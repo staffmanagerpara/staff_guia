@@ -30,11 +30,6 @@
             to { opacity: 1; transform: scale(1); }
         }
         
-        @keyframes glowPulse {
-            0%, 100% { box-shadow: 0 0 5px rgba(255, 68, 34, 0.3); }
-            50% { box-shadow: 0 0 25px rgba(255, 68, 34, 0.5); }
-        }
-        
         @keyframes rotateSlow {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
@@ -53,6 +48,12 @@
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.4; }
+        }
+        
+        @keyframes notificationBadgePulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); background-color: #ff2200; }
+            100% { transform: scale(1); }
         }
 
         /* ========= LOGIN ========= */
@@ -285,6 +286,7 @@
             transition: all 0.3s ease;
             margin: 4px 12px;
             border-radius: 16px;
+            position: relative;
         }
         
         .nav-item:hover {
@@ -297,6 +299,26 @@
             background: linear-gradient(90deg, rgba(255,68,34,0.2), transparent);
             color: #ff8844;
             border-left: 3px solid #ff4422;
+        }
+
+        /* Notificacion badge */
+        .notification-badge {
+            position: absolute;
+            right: 20px;
+            top: 8px;
+            background: #ff4422;
+            color: white;
+            border-radius: 50%;
+            min-width: 22px;
+            height: 22px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 6px;
+            box-shadow: 0 0 8px rgba(255,68,34,0.6);
+            animation: notificationBadgePulse 1s ease-in-out 2;
         }
 
         .menu-toggle {
@@ -707,7 +729,7 @@
             </svg>
             <span>Inicio</span>
         </div>
-        <div class="nav-item" data-section="anuncios">
+        <div class="nav-item" data-section="anuncios" id="anunciosNavItem">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path d="M18 8C19.66 8 21 9.34 21 11V16C21 17.66 19.66 19 18 19H6C4.34 19 3 17.66 3 16V11C3 9.34 4.34 8 6 8"/>
                 <path d="M12 4V14M12 14L15 11M12 14L9 11"/>
@@ -722,6 +744,12 @@
                 <path d="M16 3.13C17.3 3.44 18.3 4.61 18.3 6C18.3 7.39 17.3 8.56 16 8.87"/>
             </svg>
             <span>Staff List</span>
+        </div>
+        <div class="nav-item" data-section="sancioneschat">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z"/>
+            </svg>
+            <span>Sanciones de Chat</span>
         </div>
         <div class="nav-item" data-section="baneos">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -824,7 +852,21 @@
             </div>
         </div>
 
-        <!-- TABLA DE BANEOS - CORREGIDA -->
+        <!-- SANCIONES DE CHAT -->
+        <div id="section-sancioneschat" class="section-content" style="display:none">
+            <div class="card">
+                <h2>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff8844" stroke-width="1.5">
+                        <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z"/>
+                    </svg>
+                    Sanciones de Chat (Muteos)
+                </h2>
+                <div class="table-wrapper" id="sancionesChatTableContainer"></div>
+                <p style="margin-top: 15px; font-size:0.8rem; color:#888"><strong>Nota:</strong> Sistema de 3 strikes. Acumular sanciones puede derivar en un castigo mayor.</p>
+            </div>
+        </div>
+
+        <!-- TABLA DE BANEOS -->
         <div id="section-baneos" class="section-content" style="display:none">
             <div class="card">
                 <h2>
@@ -835,11 +877,11 @@
                     Tabla de Baneos
                 </h2>
                 <div class="table-wrapper" id="baneosTableContainer"></div>
-                <p style="margin-top: 15px; font-size:0.8rem; color:#888"><strong>Nota:</strong> Estas sanciones son acumulativas. La tercera sanción puede resultar en baneo permanente.</p>
+                <p style="margin-top: 15px; font-size:0.8rem; color:#888"><strong>Nota:</strong> Sistema de 3 strikes. La sanción por Dupeo se discute directamente con el Head Staff.</p>
             </div>
         </div>
 
-        <!-- AISLAMIENTO DISCORD - CORREGIDO -->
+        <!-- AISLAMIENTO DISCORD -->
         <div id="section-aislamiento" class="section-content" style="display:none">
             <div class="card">
                 <h2>
@@ -947,106 +989,93 @@
     const STAFF_EMAIL = "staff@ragnarmc.net";
     const STAFF_PASS = "Staff123";
     
-    // ==================== DATOS ====================
+    // ==================== DATOS ACTUALIZADOS SEGUN GUIA OFICIAL ====================
     let anunciosData = [
-                {
-                        "id": 1,
-                        "titulo": "NUEVA PAGINA WEB",
-                        "contenido": "Se ha implementado una pagina web oficial del equipo de Staff de RagnarMC, Bienvenidos.",
-                        "autor": "paraujoIab",
-                        "fecha": "18 de mayo de 2026"
-                }
-        ];
-    
-    let staffData = [
-                {
-                        "id": 1,
-                        "name": "paraujoIab",
-                        "rank": "Manager",
-                        "since": "2026",
-                        "status": "online",
-                        "avatar": "PA"
-                },
-                {
-                        "id": 2,
-                        "name": "tyvorn",
-                        "rank": "T-Mod",
-                        "since": "2026",
-                        "status": "online",
-                        "avatar": "TY"
-                },
-                {
-                        "id": 3,
-                        "name": "elpapu_xd3",
-                        "rank": "T-Mod",
-                        "since": "2026",
-                        "status": "online",
-                        "avatar": "EL"
-                },
-                {
-                        "id": 4,
-                        "name": "iDeCrays",
-                        "rank": "Dueño",
-                        "since": "2026",
-                        "status": "online",
-                        "avatar": "ID"
-                },
-                {
-                        "id": 5,
-                        "name": "zPuerkas",
-                        "rank": "Mod",
-                        "since": "2026",
-                        "status": "online",
-                        "avatar": "ZP"
-                }
-        ];
-    
-    // Datos de baneos - CORREGIDOS
-    const baneosData = [
-        { infraccion: "Promoción de servidor externo (IP)", duracion: "Permanente" },
-        { infraccion: "Doxeo", duracion: "Permanente" },
-        { infraccion: "Amenaza de Doxeo", duracion: "30 días" },
-        { infraccion: "Amenaza de robo de cuentas", duracion: "30 días" },
-        { infraccion: "Hacks claros", duracion: "30 días" },
-        { infraccion: "Evadir SS", duracion: "30 días" },
-        { infraccion: "Hacks en SS", duracion: "30 días" },
-        { infraccion: "Evadir sanción [Intento de bypass]", duracion: "30 días" },
-        { infraccion: "Estafa de rankeo", duracion: "30 días" },
-        { infraccion: "Modificaciones de archivos", duracion: "30 días" },
-        { infraccion: "Ventas ilegales", duracion: "30 días" },
-        { infraccion: "Hacks admitidos", duracion: "20 días" },
-        { infraccion: "Robo en trade", duracion: "20 días" },
-        { infraccion: "Cómplice de hacker", duracion: "15 días" },
-        { infraccion: "Estafa", duracion: "15 días" },
-        { infraccion: "Autoclick en SS", duracion: "15 días" },
-        { infraccion: "Acoso a jugadores", duracion: "7 días" },
-        { infraccion: "Autoclick admitido", duracion: "10 días" },
-        { infraccion: "Bug abuse", duracion: "10 días" },
-        { infraccion: "Tpakill", duracion: "7 días" },
-        { infraccion: "FarmKills", duracion: "7 días" },
-        { infraccion: "Suplantar a un Staff", duracion: "3 días" },
-        { infraccion: "Uso de multicuentas en Gens", duracion: "1 día" },
-        { infraccion: "2vs1 OneBlock/Earth/SurvivalOP", duracion: "1 hora" },
-        { infraccion: "Uso de multicuentas en Keyall", duracion: "1 hora" }
+        {
+            "id": 1,
+            "titulo": "NUEVA PAGINA WEB",
+            "contenido": "Se ha implementado una pagina web oficial del equipo de Staff de RagnarMC, Bienvenidos.",
+            "autor": "paraujoIab",
+            "fecha": "18 de mayo de 2026"
+        }
     ];
     
-    // Datos de aislamiento - CORREGIDOS
+    let staffData = [
+        { "id": 1, "name": "paraujoIab", "rank": "Manager", "since": "2026", "status": "online", "avatar": "PA" },
+        { "id": 2, "name": "tyvorn", "rank": "T-Mod", "since": "2026", "status": "online", "avatar": "TY" },
+        { "id": 3, "name": "elpapu_xd3", "rank": "T-Mod", "since": "2026", "status": "online", "avatar": "EL" },
+        { "id": 4, "name": "iDeCrays", "rank": "Dueño", "since": "2026", "status": "online", "avatar": "ID" },
+        { "id": 5, "name": "zPuerkas", "rank": "Mod", "since": "2026", "status": "online", "avatar": "ZP" }
+    ];
+    
+    // --- SANCIONES DE CHAT (MUTEOS) ---
+    const sancionesChatData = [
+        { categoria: "Flood / Spam", nivel: "1", duracion: "Mute 15 min" },
+        { categoria: "Flood / Spam", nivel: "2", duracion: "Mute 30 min" },
+        { categoria: "Flood / Spam", nivel: "3", duracion: "Mute 1 hora" },
+        { categoria: "Toxicidad / Insultos", nivel: "1", duracion: "Mute 10 min" },
+        { categoria: "Toxicidad / Insultos", nivel: "2", duracion: "Mute 20 min" },
+        { categoria: "Toxicidad / Insultos", nivel: "3", duracion: "Mute 60 min" },
+        { categoria: "Staff / Server Disrespect", nivel: "1", duracion: "Mute 2 horas" },
+        { categoria: "Staff / Server Disrespect", nivel: "2", duracion: "Mute 4 horas" },
+        { categoria: "Staff / Server Disrespect", nivel: "3", duracion: "Ban 1 día" },
+        { categoria: "Pasar IPs de Otros Servidores", nivel: "1", duracion: "Mute 30 min" },
+        { categoria: "Pasar IPs de Otros Servidores", nivel: "2", duracion: "Mute 1 hora" },
+        { categoria: "Pasar IPs de Otros Servidores", nivel: "3", duracion: "Mute 2 horas" },
+        { categoria: "Amenaza de DDoS / Doxing", nivel: "1", duracion: "Mute 1 día" },
+        { categoria: "Amenaza de DDoS / Doxing", nivel: "2", duracion: "Mute 5 días" },
+        { categoria: "Amenaza de DDoS / Doxing", nivel: "3", duracion: "Mute 20 días" },
+        { categoria: "Contenido +18", nivel: "1", duracion: "Mute 12 horas" },
+        { categoria: "Contenido +18", nivel: "2", duracion: "Mute 16 horas" },
+        { categoria: "Contenido +18", nivel: "3", duracion: "Mute 20 horas" }
+    ];
+    
+    // --- DATA DE BANEOS ---
+    const baneosData = [
+        { infraccion: "Ban Evading", detalle: "Se le agregan 10 días a la sanción original.", duracion: "Extensión" },
+        { infraccion: "Estafa", nivel: "1", duracion: "Baneo 3 días" },
+        { infraccion: "Estafa", nivel: "2", duracion: "Baneo 5 días" },
+        { infraccion: "Estafa", nivel: "3", duracion: "Baneo 7 días" },
+        { infraccion: "Bug Abuse", nivel: "1", duracion: "Baneo 3 días" },
+        { infraccion: "Bug Abuse", nivel: "2", duracion: "Baneo 5 días" },
+        { infraccion: "Bug Abuse", nivel: "3", duracion: "Baneo 7 días" },
+        { infraccion: "Uso de Hacks", nivel: "1", duracion: "Baneo 7 días" },
+        { infraccion: "Uso de Hacks", nivel: "2", duracion: "Baneo 14 días" },
+        { infraccion: "Uso de Hacks", nivel: "3", duracion: "Baneo 20 días" },
+        { infraccion: "Hacks encontrados en SS", nivel: "1", duracion: "Baneo 10 días" },
+        { infraccion: "Hacks encontrados en SS", nivel: "2", duracion: "Baneo 20 días" },
+        { infraccion: "Hacks encontrados en SS", nivel: "3", duracion: "Baneo 30 días" },
+        { infraccion: "Hacks admitidos", nivel: "1", duracion: "Baneo 5 días" },
+        { infraccion: "Hacks admitidos", nivel: "2", duracion: "Baneo 10 días" },
+        { infraccion: "Hacks admitidos", nivel: "3", duracion: "Baneo 15 días" },
+        { infraccion: "Cómplice de Hacker", nivel: "1", duracion: "Baneo 5 días" },
+        { infraccion: "Cómplice de Hacker", nivel: "2", duracion: "Baneo 10 días" },
+        { infraccion: "Cómplice de Hacker", nivel: "3", duracion: "Baneo 15 días" },
+        { infraccion: "Uso De Mods Ilegales", nivel: "1", duracion: "Baneo 3 días" },
+        { infraccion: "Uso De Mods Ilegales", nivel: "2", duracion: "Baneo 7 días" },
+        { infraccion: "Uso De Mods Ilegales", nivel: "3", duracion: "Baneo 14 días" },
+        { infraccion: "Autoclick / Macros", nivel: "1", duracion: "Baneo 3 días" },
+        { infraccion: "Autoclick / Macros", nivel: "2", duracion: "Baneo 7 días" },
+        { infraccion: "Autoclick / Macros", nivel: "3", duracion: "Baneo 12 días" },
+        { infraccion: "Farmeo de Kills", nivel: "1", duracion: "Baneo 2 días" },
+        { infraccion: "Farmeo de Kills", nivel: "2", duracion: "Baneo 5 días" },
+        { infraccion: "Farmeo de Kills", nivel: "3", duracion: "Baneo 10 días" },
+        { infraccion: "Dupeo", duracion: "Sanción discutida con Head Staff", esEspecial: true },
+        { infraccion: "Doxing / DDoS", duracion: "Ban IP Permanente", esEspecial: true }
+    ];
+    
+    // --- DATA DE AISLAMIENTO DISCORD ---
     const aislamientoData = [
-        { infraccion: "Promoción de servidores externos", duracion: "Permanente" },
-        { infraccion: "Doxeo", duracion: "Permanente" },
-        { infraccion: "Buscar Staff para servidores externos", duracion: "Permanente" },
-        { infraccion: "Nefus / Nsfw", duracion: "Permanente" },
-        { infraccion: "Estafa", duracion: "Permanente" },
-        { infraccion: "Insultos al servidor", duracion: "Permanente" },
-        { infraccion: "Gore", duracion: "Permanente" },
-        { infraccion: "Falta de respeto al Staff", duracion: "Permanente" },
-        { infraccion: "Faltar el respeto en tickets", duracion: "Permanente" },
-        { infraccion: "Crear múltiples tickets", duracion: "Permanente" },
-        { infraccion: "Tráficos externos", duracion: "Permanente" },
-        { infraccion: "Spam", duracion: "Permanente" },
-        { infraccion: "Insultos", duracion: "Permanente" },
-        { infraccion: "Nombrar servidores externos", duracion: "Permanente" },
-        { infraccion: "Compartir pantallas en servidores externos", duracion: "Permanente" }
+        { categoria: "Insultos", nivel: "1", duracion: "Aislamiento 10 min" },
+        { categoria: "Insultos", nivel: "2", duracion: "Aislamiento 30 min" },
+        { categoria: "Insultos", nivel: "3", duracion: "Aislamiento 1 hora" },
+        { categoria: "Spam o Flood", nivel: "1", duracion: "Aislamiento 10 min" },
+        { categoria: "Spam o Flood", nivel: "2", duracion: "Aislamiento 30 min" },
+        { categoria: "Spam o Flood", nivel: "3", duracion: "Aislamiento 1 hora" },
+        { categoria: "Insultos al Staff", nivel: "1", duracion: "Aislamiento 30 min" },
+        { categoria: "Insultos al Staff", nivel: "2", duracion: "Aislamiento 1 hora" },
+        { categoria: "Insultos al Staff", nivel: "3", duracion: "Aislamiento 2 horas" },
+        { categoria: "Discords Externos", duracion: "Baneo Inmediato", esUnica: true }
     ];
     
     const comandosHTML = `<ul class="comandos-list">
@@ -1064,152 +1093,157 @@
         <li><code>/stafflist</code> - Todos</li>
     </ul>`;
     
-    // Cargar datos desde GitHub (sincronizados con el administrador)
-    function loadSavedData() {
-        // Fallback: si hay datos en localStorage úsalos mientras carga GitHub
-        if(localStorage.getItem('ragnarAdminAnunciosData')) anunciosData = JSON.parse(localStorage.getItem('ragnarAdminAnunciosData'));
-        if(localStorage.getItem('ragnarAdminStaffData'))    staffData    = JSON.parse(localStorage.getItem('ragnarAdminStaffData'));
-
-        // Fetch desde GitHub (sin token, el repo es público)
-        const ghUrl = 'https://raw.githubusercontent.com/staffmanagerpara/staff_guia/main/index.html?t=' + Date.now();
-        fetch(ghUrl)
-            .then(r => r.text())
-            .then(html => {
-                try {
-                    const matchA = html.match(/let anunciosData\s*=\s*(\[[\s\S]*?\]);/);
-                    const matchS = html.match(/let staffData\s*=\s*(\[[\s\S]*?\]);/);
-                    const matchB = html.match(/let baneosData\s*=\s*(\[[\s\S]*?\]);/);
-                    const matchI = html.match(/let aislamientoData\s*=\s*(\[[\s\S]*?\]);/);
-                    const matchC = html.match(/const comandosHTML\s*=\s*`([\s\S]*?)`;/);
-                    if(matchA) { anunciosData = JSON.parse(matchA[1]); }
-                    if(matchS) { staffData    = JSON.parse(matchS[1]); }
-                    if(matchB) { baneosData   = JSON.parse(matchB[1]); }
-                    if(matchI) { aislamientoData = JSON.parse(matchI[1]); }
-                    if(matchC) { localStorage.setItem('ragnarAdminComandos', matchC[1]); }
-                    // Re-render la sección activa
-                    const active = document.querySelector('.nav-item.active');
-                    if(active) showSection(active.getAttribute('data-section'));
-                } catch(e) { console.warn('Error al parsear datos de GitHub:', e); }
-            })
-            .catch(() => {}); // silencioso si no hay internet
+    // ==================== NOTIFICACIONES DE ANUNCIOS ====================
+    let anunciosLeidos = false;
+    
+    function playNotificationSound() {
+        try {
+            // Crear un sonido beep simple usando Web Audio API (no requiere archivo externo)
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.frequency.value = 880; // Nota A5
+            gainNode.gain.value = 0.3;
+            oscillator.start();
+            gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + 0.5);
+            oscillator.stop(audioContext.currentTime + 0.5);
+            // Reactivar audio context después de user gesture
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        } catch(e) {
+            console.log("Sonido no disponible");
+        }
     }
     
-    function getBadgeClass(duracion) {
-        if(duracion.toLowerCase().includes('permanente')) return 'badge-perm';
-        if(duracion.toLowerCase().includes('hora')) return 'badge-hour';
-        return 'badge-temp';
+    function updateNotificationBadge() {
+        const navItem = document.getElementById('anunciosNavItem');
+        if (!navItem) return;
+        
+        // Eliminar badge existente
+        const existingBadge = navItem.querySelector('.notification-badge');
+        if (existingBadge) existingBadge.remove();
+        
+        // Si hay anuncios y no se han leído, mostrar badge
+        if (anunciosData.length > 0 && !anunciosLeidos) {
+            const badge = document.createElement('span');
+            badge.className = 'notification-badge';
+            badge.textContent = anunciosData.length;
+            navItem.appendChild(badge);
+        }
     }
     
-    function escapeHtml(text) {
-        if(!text) return '';
-        return text.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
+    function checkForNewAnnouncements() {
+        const storedAnunciosStr = localStorage.getItem('ragnarAnunciosData');
+        if (storedAnunciosStr) {
+            try {
+                const storedAnuncios = JSON.parse(storedAnunciosStr);
+                const storedIds = storedAnuncios.map(a => a.id);
+                const currentIds = anunciosData.map(a => a.id);
+                
+                // Verificar si hay nuevos IDs que no estaban antes
+                const hasNew = currentIds.some(id => !storedIds.includes(id));
+                
+                if (hasNew) {
+                    // Resetear el estado de leído porque hay nuevos anuncios
+                    anunciosLeidos = false;
+                    playNotificationSound();
+                    updateNotificationBadge();
+                }
+            } catch(e) {}
+        }
+        // Guardar la lista actual para futuras comparaciones
+        localStorage.setItem('ragnarAnunciosData', JSON.stringify(anunciosData));
     }
     
-    // ==================== RENDER ANUNCIOS ====================
+    function markAnnouncementsAsRead() {
+        anunciosLeidos = true;
+        updateNotificationBadge();
+        localStorage.setItem('ragnarAnunciosLeidos', 'true');
+        localStorage.setItem('ragnarAnunciosData', JSON.stringify(anunciosData));
+    }
+    
+    // Sobrescribir la función de renderizado para incluir la marca de leídos al hacer clic
+    const originalRenderAnuncios = renderAnuncios;
+    window.renderAnuncios = function() {
+        originalRenderAnuncios();
+        if (!anunciosLeidos) {
+            markAnnouncementsAsRead();
+        }
+    };
+    
+    // ==================== FUNCIONES DE RENDERIZADO ====================
+    function renderSancionesChat() {
+        const container = document.getElementById('sancionesChatTableContainer');
+        if(!container) return;
+        let html = `<table class="sancion-table"><thead><tr><th>Categoría</th><th>Nivel</th><th>Duración</th></tr></thead><tbody>`;
+        sancionesChatData.forEach(s => {
+            html += `<tr><td>${escapeHtml(s.categoria)}</td><td>${s.nivel}</td><td><span class="badge-temp">${escapeHtml(s.duracion)}</span></td></tr>`;
+        });
+        html += `</tbody></table>`;
+        container.innerHTML = html;
+    }
+    
+    function renderBaneos() {
+        const container = document.getElementById('baneosTableContainer');
+        if(!container) return;
+        let html = `<table class="sancion-table"><thead><tr><th>Infracción</th><th>Nivel / Detalle</th><th>Duración / Sanción</th></tr></thead><tbody>`;
+        baneosData.forEach(b => {
+            const nivelODetalle = b.nivel ? `Nivel ${b.nivel}` : (b.detalle || (b.esEspecial ? "Especial" : ""));
+            const claseBadge = b.duracion.includes("Permanente") ? 'badge-perm' : (b.esEspecial ? 'badge-perm' : 'badge-temp');
+            html += `<tr><td>${escapeHtml(b.infraccion)}</td><td>${escapeHtml(nivelODetalle)}</td><td><span class="${claseBadge}">${escapeHtml(b.duracion)}</span></td></tr>`;
+        });
+        html += `</tbody></table>`;
+        container.innerHTML = html;
+    }
+    
+    function renderAislamiento() {
+        const container = document.getElementById('aislamientoTableContainer');
+        if(!container) return;
+        let html = `<table class="sancion-table"><thead><tr><th>Categoría</th><th>Nivel</th><th>Duración</th></tr></thead><tbody>`;
+        aislamientoData.forEach(a => {
+            const nivel = a.nivel || (a.esUnica ? "Única" : "");
+            const claseBadge = a.duracion.includes("Baneo") ? 'badge-perm' : 'badge-temp';
+            html += `<tr><td>${escapeHtml(a.categoria)}</td><td>${nivel}</td><td><span class="${claseBadge}">${escapeHtml(a.duracion)}</span></td></tr>`;
+        });
+        html += `</tbody></table>`;
+        container.innerHTML = html;
+    }
+    
     function renderAnuncios() {
         const container = document.getElementById('anunciosContainer');
         if(!container) return;
-        
         if(anunciosData.length === 0) {
             container.innerHTML = '<div style="text-align:center; padding:40px; color:#888">No hay anuncios publicados actualmente.</div>';
             return;
         }
-        
         container.innerHTML = anunciosData.map(a => `
             <div class="anuncio-card">
                 <div class="anuncio-titulo">${escapeHtml(a.titulo)}</div>
                 <div class="anuncio-contenido">${escapeHtml(a.contenido)}</div>
                 <div class="anuncio-meta">
-                    <span class="anuncio-autor">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2">
-                            <circle cx="12" cy="8" r="4"/>
-                            <path d="M5 20V19C5 15.13 8.13 12 12 12C15.87 12 19 15.13 19 19V20"/>
-                        </svg>
-                        ${escapeHtml(a.autor)}
-                    </span>
-                    <span class="anuncio-fecha">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2">
-                            <rect x="3" y="4" width="18" height="18" rx="2"/>
-                            <path d="M8 2V6M16 2V6M3 10H21"/>
-                        </svg>
-                        ${a.fecha}
-                    </span>
+                    <span class="anuncio-autor"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M5 20V19C5 15.13 8.13 12 12 12C15.87 12 19 15.13 19 19V20"/></svg>${escapeHtml(a.autor)}</span>
+                    <span class="anuncio-fecha"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M8 2V6M16 2V6M3 10H21"/></svg>${a.fecha}</span>
                 </div>
             </div>
         `).join('');
     }
     
-    // ==================== RENDER STAFF ====================
     function renderStaffList() {
         const container = document.getElementById('staffListContainer');
         if(!container) return;
         const onlineCount = staffData.filter(m => m.status === 'online').length;
         container.innerHTML = staffData.map(m => `
-            <div class="staff-card">
-                <div class="staff-avatar">${escapeHtml(m.avatar)}</div>
-                <div style="flex:1">
-                    <strong>${escapeHtml(m.name)}</strong><br>
-                    ${escapeHtml(m.rank)}<br>
-                    <small style="color:#888">Desde: ${m.since}</small>
-                </div>
-                <div class="${m.status === 'online' ? 'online-indicator' : 'offline-indicator'}"></div>
-            </div>
+            <div class="staff-card"><div class="staff-avatar">${escapeHtml(m.avatar)}</div><div style="flex:1"><strong>${escapeHtml(m.name)}</strong><br>${escapeHtml(m.rank)}<br><small style="color:#888">Desde: ${m.since}</small></div><div class="${m.status === 'online' ? 'online-indicator' : 'offline-indicator'}"></div></div>
         `).join('');
         document.getElementById('totalStaff').innerText = staffData.length;
         document.getElementById('onlineStaff').innerText = onlineCount;
     }
     
-    // ==================== RENDER BANEOS (CORREGIDO) ====================
-    function renderBaneos() {
-        const container = document.getElementById('baneosTableContainer');
-        if(!container) return;
-        
-        let html = `<table class="sancion-table">
-            <thead>
-                <tr><th>Infracción</th><th>Duración</th></tr>
-            </thead>
-            <tbody>`;
-        
-        for(let i = 0; i < baneosData.length; i++) {
-            const item = baneosData[i];
-            const badgeClass = getBadgeClass(item.duracion);
-            html += `<tr>
-                <td>${escapeHtml(item.infraccion)}</td>
-                <td><span class="${badgeClass}">${escapeHtml(item.duracion)}</span></td>
-            </tr>`;
-        }
-        
-        html += `</tbody>
-        </table>`;
-        container.innerHTML = html;
-    }
+    function escapeHtml(text) { if(!text) return ''; return text.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'); }
     
-    // ==================== RENDER AISLAMIENTO (CORREGIDO) ====================
-    function renderAislamiento() {
-        const container = document.getElementById('aislamientoTableContainer');
-        if(!container) return;
-        
-        let html = `<table class="sancion-table">
-            <thead>
-                <tr><th>Infracción</th><th>Duración</th></tr>
-            </thead>
-            <tbody>`;
-        
-        for(let i = 0; i < aislamientoData.length; i++) {
-            const item = aislamientoData[i];
-            const badgeClass = getBadgeClass(item.duracion);
-            html += `<tr>
-                <td>${escapeHtml(item.infraccion)}</td>
-                <td><span class="${badgeClass}">${escapeHtml(item.duracion)}</span></td>
-            </tr>`;
-        }
-        
-        html += `</tbody>
-        </table>`;
-        container.innerHTML = html;
-    }
-    
-    // ==================== PERFIL STAFF ====================
     function loadStaffProfile() {
         const savedName = localStorage.getItem('ragnarStaffName') || 'Staff Member';
         const savedRank = localStorage.getItem('ragnarStaffRank') || 'Moderador';
@@ -1229,18 +1263,18 @@
         }
     }
     
-    // ==================== NAVEGACIÓN ====================
     function showSection(sectionId) {
-        const sections = ['inicio', 'anuncios', 'stafflist', 'baneos', 'aislamiento', 'comandos', 'guiass', 'perfil'];
-        sections.forEach(id => { 
-            const el = document.getElementById(`section-${id}`); 
-            if(el) el.style.display = 'none'; 
-        });
+        const sections = ['inicio', 'anuncios', 'stafflist', 'sancioneschat', 'baneos', 'aislamiento', 'comandos', 'guiass', 'perfil'];
+        sections.forEach(id => { const el = document.getElementById(`section-${id}`); if(el) el.style.display = 'none'; });
         const activeSection = document.getElementById(`section-${sectionId}`);
         if(activeSection) activeSection.style.display = 'block';
         
-        if(sectionId === 'anuncios') renderAnuncios();
+        if(sectionId === 'anuncios') {
+            renderAnuncios();
+            markAnnouncementsAsRead();
+        }
         if(sectionId === 'stafflist') renderStaffList();
+        if(sectionId === 'sancioneschat') renderSancionesChat();
         if(sectionId === 'baneos') renderBaneos();
         if(sectionId === 'aislamiento') renderAislamiento();
         if(sectionId === 'comandos') document.getElementById('comandosContainer').innerHTML = comandosHTML;
@@ -1251,48 +1285,66 @@
         if(window.innerWidth <= 768) closeMenu();
     }
     
-    function openMenu() { 
-        document.getElementById('sidebar')?.classList.add('open'); 
-        document.getElementById('menuOverlay')?.classList.add('active'); 
-    }
-    
-    function closeMenu() { 
-        document.getElementById('sidebar')?.classList.remove('open'); 
-        document.getElementById('menuOverlay')?.classList.remove('active'); 
-    }
+    function openMenu() { document.getElementById('sidebar')?.classList.add('open'); document.getElementById('menuOverlay')?.classList.add('active'); }
+    function closeMenu() { document.getElementById('sidebar')?.classList.remove('open'); document.getElementById('menuOverlay')?.classList.remove('active'); }
     
     document.getElementById('menuToggle')?.addEventListener('click', openMenu);
     document.getElementById('menuOverlay')?.addEventListener('click', closeMenu);
     window.addEventListener('resize', () => { if(window.innerWidth > 768) closeMenu(); });
+    document.querySelectorAll('.nav-item[data-section]').forEach(item => { item.addEventListener('click', () => showSection(item.getAttribute('data-section'))); });
     
-    document.querySelectorAll('.nav-item[data-section]').forEach(item => {
-        item.addEventListener('click', () => showSection(item.getAttribute('data-section')));
-    });
+    // ==================== SIMULACION DE ACTUALIZACION EN TIEMPO REAL ====================
+    function checkForUpdates() {
+        // Simular la carga de nuevos anuncios desde GitHub o fuente externa
+        // En un entorno real, aquí se haría un fetch a una API
+        // Por ahora, mantenemos los datos actuales pero verificamos si hubo cambios
+        const storedAnunciosStr = localStorage.getItem('ragnarAnunciosData');
+        if (storedAnunciosStr) {
+            try {
+                const storedAnuncios = JSON.parse(storedAnunciosStr);
+                const storedIds = storedAnuncios.map(a => a.id);
+                const currentIds = anunciosData.map(a => a.id);
+                
+                // Si hay nuevos IDs, resetear el estado de leído
+                if (currentIds.some(id => !storedIds.includes(id))) {
+                    anunciosLeidos = false;
+                    playNotificationSound();
+                    updateNotificationBadge();
+                }
+            } catch(e) {}
+        }
+        localStorage.setItem('ragnarAnunciosData', JSON.stringify(anunciosData));
+    }
     
-    // ==================== LOGIN ====================
-    const loginScreen = document.getElementById('loginScreen');
-    const dashboard = document.getElementById('dashboard');
+    // Verificar cada 30 segundos si hubo cambios (simula notificaciones en tiempo real)
+    setInterval(checkForUpdates, 30000);
     
     function doLogin(email, password) {
-        if(email.trim() !== STAFF_EMAIL || password.trim() !== STAFF_PASS) {
-            document.getElementById('loginError').innerText = "Acceso denegado";
-            return false;
-        }
+        if(email.trim() !== STAFF_EMAIL || password.trim() !== STAFF_PASS) { document.getElementById('loginError').innerText = "Acceso denegado"; return false; }
         localStorage.setItem('ragnarStaffLogged', 'true');
-        loginScreen.style.display = 'none';
-        dashboard.style.display = 'block';
-        loadSavedData();
+        
+        // Cargar estado de lectura de anuncios
+        const leidos = localStorage.getItem('ragnarAnunciosLeidos');
+        anunciosLeidos = leidos === 'true';
+        
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
         loadStaffProfile();
+        checkForUpdates();
+        updateNotificationBadge();
         showSection('inicio');
         return true;
     }
     
     function checkSession() {
         if(localStorage.getItem('ragnarStaffLogged') === 'true') {
-            loginScreen.style.display = 'none';
-            dashboard.style.display = 'block';
-            loadSavedData();
+            const leidos = localStorage.getItem('ragnarAnunciosLeidos');
+            anunciosLeidos = leidos === 'true';
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
             loadStaffProfile();
+            checkForUpdates();
+            updateNotificationBadge();
             showSection('inicio');
         }
     }
@@ -1300,41 +1352,11 @@
     document.getElementById('loginBtn').onclick = () => doLogin(document.getElementById('loginEmail').value, document.getElementById('loginPassword').value);
     document.getElementById('logoutBtn').onclick = () => { localStorage.removeItem('ragnarStaffLogged'); location.reload(); };
     
-    // ==================== EDITAR PERFIL ====================
-    document.getElementById('editProfileBtn')?.addEventListener('click', () => {
-        const modal = document.getElementById('editProfileModal');
-        if(modal) {
-            document.getElementById('editStaffName').value = localStorage.getItem('ragnarStaffName') || 'Staff Member';
-            document.getElementById('editStaffRank').value = localStorage.getItem('ragnarStaffRank') || 'Moderador';
-            modal.style.display = 'block';
-        }
-    });
-    
-    document.getElementById('saveProfileChangesBtn')?.addEventListener('click', () => {
-        const newName = document.getElementById('editStaffName').value;
-        const newRank = document.getElementById('editStaffRank').value;
-        if(newName) localStorage.setItem('ragnarStaffName', newName);
-        if(newRank) localStorage.setItem('ragnarStaffRank', newRank);
-        loadStaffProfile();
-        document.getElementById('editProfileModal').style.display = 'none';
-        alert('Perfil actualizado');
-    });
-    
+    document.getElementById('editProfileBtn')?.addEventListener('click', () => { document.getElementById('editProfileModal').style.display = 'block'; document.getElementById('editStaffName').value = localStorage.getItem('ragnarStaffName') || 'Staff Member'; document.getElementById('editStaffRank').value = localStorage.getItem('ragnarStaffRank') || 'Moderador'; });
+    document.getElementById('saveProfileChangesBtn')?.addEventListener('click', () => { const newName = document.getElementById('editStaffName').value; const newRank = document.getElementById('editStaffRank').value; if(newName) localStorage.setItem('ragnarStaffName', newName); if(newRank) localStorage.setItem('ragnarStaffRank', newRank); loadStaffProfile(); document.getElementById('editProfileModal').style.display = 'none'; alert('Perfil actualizado'); });
     document.getElementById('cancelEditBtn')?.addEventListener('click', () => document.getElementById('editProfileModal').style.display = 'none');
     document.getElementById('changeAvatarBtn')?.addEventListener('click', () => document.getElementById('avatarUpload').click());
-    document.getElementById('avatarUpload')?.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if(file && file.size <= 2*1024*1024) {
-            const reader = new FileReader();
-            reader.onload = (ev) => { 
-                localStorage.setItem('ragnarStaffAvatar', ev.target.result); 
-                loadStaffProfile(); 
-            };
-            reader.readAsDataURL(file);
-        } else {
-            alert('La imagen no debe superar los 2MB');
-        }
-    });
+    document.getElementById('avatarUpload')?.addEventListener('change', (e) => { const file = e.target.files[0]; if(file && file.size <= 2*1024*1024) { const reader = new FileReader(); reader.onload = (ev) => { localStorage.setItem('ragnarStaffAvatar', ev.target.result); loadStaffProfile(); }; reader.readAsDataURL(file); } else { alert('La imagen no debe superar los 2MB'); } });
     
     checkSession();
 </script>
